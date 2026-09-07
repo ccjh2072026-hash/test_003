@@ -75,12 +75,13 @@
                                     <option value="綜合">綜合領域</option>
                                     <option value="藝文">藝術與人文領域</option>
                                     <option value="健康與體育">健康與體育領域</option>
+                                    <option value="其他">其他領域</option>
                                 </select>
                             </div>
                             <div>
-                                <label class="block text-sm font-semibold text-slate-700 mb-1">本班教學欲使用平板設備</label>
+                                <label class="block text-sm font-semibold text-white mb-1">本班教學欲使用平板設備</label>
                                 <div class="flex gap-6 mt-2">
-                                    <span class="text-sm text-slate-600">Windows-Surface Go & iOS-ipad 由管理員分配</span>
+                                    <span class="text-sm text-white">Windows-Surface Go & iOS-ipad 由管理員分配</span>
                                 </div>
                             </div>
                         </div>
@@ -172,7 +173,12 @@
                             <h2 class="text-xl font-bold text-slate-900">平板借用申請審核管理</h2>
                             <p class="text-slate-500 text-sm mt-1">審核通過後，該借用時段將立即生效並顯示於總借用課表中。</p>
                         </div>
-                        <span id="pendingCountBadge" class="bg-amber-100 text-amber-800 text-xs font-semibold px-3 py-1 rounded-full">等待審核: 0 筆</span>
+                        <div class="flex items-center gap-3">
+                            <button onclick="refreshAdminData()" id="btn-refresh-admin" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold transition flex items-center gap-1.5 shadow-sm">
+                                <i class="fa-solid fa-arrows-rotate"></i> 重新整理
+                            </button>
+                            <span id="pendingCountBadge" class="bg-amber-100 text-amber-800 text-xs font-semibold px-3 py-1 rounded-full">等待審核: 0 筆</span>
+                        </div>
                     </div>
 
                     <div class="overflow-x-auto">
@@ -346,6 +352,23 @@
             }
         }
 
+        // 重新整理管理後台資料
+        async function refreshAdminData() {
+            const btn = document.getElementById('btn-refresh-admin');
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fa-solid fa-arrows-rotate fa-spin"></i> 讀取中...';
+            }
+            
+            await fetchApplications();
+            renderAdminTable();
+
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-arrows-rotate"></i> 重新整理';
+            }
+        }
+
         // 管理員登入彈窗控制
         function openLoginModal() {
             document.getElementById('adminUsername').value = '';
@@ -467,8 +490,7 @@
             document.getElementById('tab-' + tabId).classList.remove('hidden');
             document.getElementById('btn-' + tabId).className = 'px-4 py-2 rounded-lg text-sm font-medium transition bg-white text-indigo-700 shadow';
 
-            // 切換分頁時自動重新自試算表讀取資料
-            if (tabId === 'admin' || tabId === 'timetable') {
+            if ((tabId === 'admin' || tabId === 'timetable') && applications.length === 0) {
                 await fetchApplications();
             }
 
@@ -542,7 +564,10 @@
 
             const dayNames = { '1': '週一', '2': '週二', '3': '週三', '4': '週四', '5': '週五' };
 
-            tbody.innerHTML = applications.map(app => {
+            // 使用 [...applications].reverse() 將陣列反向，最新的資料會在最上面
+            const sortedApplications = [...applications].reverse();
+
+            tbody.innerHTML = sortedApplications.map(app => {
                 const slot = String(app.slotCode || '');
                 const dayText = dayNames[slot[0]] || '';
                 const periodText = slot[1] || '';
@@ -620,7 +645,6 @@
             applications[appIndex].deviceType = selectedDevice;
 
             try {
-                // 傳送完整資訊（同時包含單獨屬性與 data 物件，兼顧不同的 GAS 後端接收寫法）
                 await fetch(GAS_API_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'text/plain;charset=utf-8' },
