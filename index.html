@@ -182,14 +182,14 @@
                     </div>
 
                     <div class="overflow-x-auto">
-                        <table class="w-full text-left border-collapse">
+                        <table class="w-full min-w-[700px] text-left border-collapse">
                             <thead>
                                 <tr class="bg-slate-100 text-slate-700 text-xs uppercase font-semibold">
                                     <th class="p-3 rounded-l-lg">申請教師</th>
                                     <th class="p-3">科目/班級</th>
-                                    <th class="p-3">裝置需求</th>
+                                    <th class="p-3 whitespace-nowrap min-w-[160px]">裝置需求</th>
                                     <th class="p-3">時段 / 教學方式說明</th>
-                                    <th class="p-3">狀態</th>
+                                    <th class="p-3 w-24 text-center whitespace-nowrap">狀態</th>
                                     <th class="p-3 rounded-r-lg text-center">操作</th>
                                 </tr>
                             </thead>
@@ -203,95 +203,113 @@
 
             <section id="tab-timetable" class="hidden space-y-6">
                 <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 overflow-hidden">
-                    <div class="flex flex-col md:flex-row justify-between items-center mb-6 pb-4 border-b border-slate-100 gap-4">
+                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 pb-4 border-b border-slate-100 gap-4">
                         <div>
                             <h2 class="text-xl font-bold text-slate-900">115學年度平板使用記錄表 (固定借用總表)</h2>
-                            <p class="text-slate-500 text-sm mt-1">根據已審核通過的申請自動即時產生之全校課表檢視</p>
+                            <p class="text-slate-500 text-sm mt-1" id="timetableSubtitle">根據已審核通過的申請自動即時產生之全校課表檢視</p>
                         </div>
-                        <button onclick="window.print()" class="px-4 py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-xl text-sm font-medium transition flex items-center gap-2">
-                            <i class="fa-solid fa-print"></i> 列印課表
+                        <div class="flex items-center gap-2">
+                            <!-- 新增的重新整理按鈕 -->
+                            <button onclick="refreshTimetableData()" id="btn-refresh-timetable" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-sm font-medium transition flex items-center gap-2 border border-slate-200">
+                                <i class="fa-solid fa-arrows-rotate"></i> 重新整理
+                            </button>
+                            <!-- 原有的列印課表按鈕 -->
+                            <button onclick="window.print()" class="px-4 py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-xl text-sm font-medium transition flex items-center gap-2">
+                                <i class="fa-solid fa-print"></i> 列印課表
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 需求 2: 篩選按鈕與目前的篩選條件標籤顯示區 -->
+                    <div class="bg-indigo-50/60 p-3 rounded-xl border border-indigo-100 mb-6 flex flex-wrap items-center justify-between gap-3">
+                        <div class="flex items-center gap-2 text-xs text-indigo-900 flex-wrap">
+                            <span class="font-bold flex items-center gap-1"><i class="fa-solid fa-filter text-indigo-600"></i> 目前篩選設備：</span>
+                            <span id="activeFilterBadge" class="bg-white text-indigo-700 px-2.5 py-1 rounded-md border border-indigo-200 font-semibold shadow-sm">全部顯示</span>
+                        </div>
+                        <button onclick="openFilterModal()" class="px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-semibold transition flex items-center gap-1.5 shadow">
+                            <i class="fa-solid fa-sliders"></i> 篩選顯示設備
                         </button>
                     </div>
 
                     <div class="overflow-x-auto">
-                        <table class="w-full border-collapse border border-slate-400 text-center text-xs">
+                        <table class="w-full border-collapse border border-slate-400 text-center text-xs table-fixed">
                             <thead>
                                 <tr class="bg-slate-200 text-slate-900 font-bold">
-                                    <th class="border border-slate-400 p-2 w-20">借用</th>
-                                    <th class="border border-slate-400 p-2 w-28">日期 / 星期</th>
-                                    <th class="border border-slate-400 p-2">一</th>
-                                    <th class="border border-slate-400 p-2">二</th>
-                                    <th class="border border-slate-400 p-2">三</th>
-                                    <th class="border border-slate-400 p-2">四</th>
-                                    <th class="border border-slate-400 p-2">五</th>
+                                    <th class="border border-slate-400 p-2 w-16">借用</th>
+                                    <th class="border border-slate-400 p-2 w-24">日期 / 星期</th>
+                                    <th class="border border-slate-400 p-2 w-1/5">一</th>
+                                    <th class="border border-slate-400 p-2 w-1/5">二</th>
+                                    <th class="border border-slate-400 p-2 w-1/5">三</th>
+                                    <th class="border border-slate-400 p-2 w-1/5">四</th>
+                                    <th class="border border-slate-400 p-2 w-1/5">五</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr>
                                     <td rowspan="4" class="border border-slate-400 bg-blue-100 font-bold text-blue-900 align-middle">上<br>午</td>
                                     <td class="border border-slate-400 p-2 bg-slate-50">第1節<br>8:15-9:00</td>
-                                    <td class="border border-slate-400 bg-blue-50/40 p-2" id="cell-1-1"></td>
-                                    <td class="border border-slate-400 bg-blue-50/40 p-2" id="cell-2-1"></td>
-                                    <td class="border border-slate-400 bg-blue-50/40 p-2" id="cell-3-1"></td>
-                                    <td class="border border-slate-400 bg-blue-50/40 p-2" id="cell-4-1"></td>
-                                    <td class="border border-slate-400 bg-blue-50/40 p-2" id="cell-5-1"></td>
+                                    <td class="border border-slate-400 bg-blue-50/40 p-2 align-top" id="cell-1-1"></td>
+                                    <td class="border border-slate-400 bg-blue-50/40 p-2 align-top" id="cell-2-1"></td>
+                                    <td class="border border-slate-400 bg-blue-50/40 p-2 align-top" id="cell-3-1"></td>
+                                    <td class="border border-slate-400 bg-blue-50/40 p-2 align-top" id="cell-4-1"></td>
+                                    <td class="border border-slate-400 bg-blue-50/40 p-2 align-top" id="cell-5-1"></td>
                                 </tr>
                                 <tr>
                                     <td class="border border-slate-400 p-2 bg-slate-50">第2節<br>9:10-09:55</td>
-                                    <td class="border border-slate-400 bg-blue-50/40 p-2" id="cell-1-2"></td>
-                                    <td class="border border-slate-400 bg-blue-50/40 p-2" id="cell-2-2"></td>
-                                    <td class="border border-slate-400 bg-blue-50/40 p-2" id="cell-3-2"></td>
-                                    <td class="border border-slate-400 bg-blue-50/40 p-2" id="cell-4-2"></td>
-                                    <td class="border border-slate-400 bg-blue-50/40 p-2" id="cell-5-2"></td>
+                                    <td class="border border-slate-400 bg-blue-50/40 p-2 align-top" id="cell-1-2"></td>
+                                    <td class="border border-slate-400 bg-blue-50/40 p-2 align-top" id="cell-2-2"></td>
+                                    <td class="border border-slate-400 bg-blue-50/40 p-2 align-top" id="cell-3-2"></td>
+                                    <td class="border border-slate-400 bg-blue-50/40 p-2 align-top" id="cell-4-2"></td>
+                                    <td class="border border-slate-400 bg-blue-50/40 p-2 align-top" id="cell-5-2"></td>
                                 </tr>
                                 <tr>
                                     <td class="border border-slate-400 p-2 bg-slate-50">第3節<br>10:05-10:50</td>
-                                    <td class="border border-slate-400 bg-blue-50/40 p-2" id="cell-1-3"></td>
-                                    <td class="border border-slate-400 bg-blue-50/40 p-2" id="cell-2-3"></td>
-                                    <td class="border border-slate-400 bg-blue-50/40 p-2" id="cell-3-3"></td>
-                                    <td class="border border-slate-400 bg-blue-50/40 p-2" id="cell-4-3"></td>
-                                    <td class="border border-slate-400 bg-blue-50/40 p-2" id="cell-5-3"></td>
+                                    <td class="border border-slate-400 bg-blue-50/40 p-2 align-top" id="cell-1-3"></td>
+                                    <td class="border border-slate-400 bg-blue-50/40 p-2 align-top" id="cell-2-3"></td>
+                                    <td class="border border-slate-400 bg-blue-50/40 p-2 align-top" id="cell-3-3"></td>
+                                    <td class="border border-slate-400 bg-blue-50/40 p-2 align-top" id="cell-4-3"></td>
+                                    <td class="border border-slate-400 bg-blue-50/40 p-2 align-top" id="cell-5-3"></td>
                                 </tr>
                                 <tr>
                                     <td class="border border-slate-400 p-2 bg-slate-50">第4節<br>11:00-11:45</td>
-                                    <td class="border border-slate-400 bg-blue-50/40 p-2" id="cell-1-4"></td>
-                                    <td class="border border-slate-400 bg-blue-50/40 p-2" id="cell-2-4"></td>
-                                    <td class="border border-slate-400 bg-blue-50/40 p-2" id="cell-3-4"></td>
-                                    <td class="border border-slate-400 bg-blue-50/40 p-2" id="cell-4-4"></td>
-                                    <td class="border border-slate-400 bg-blue-50/40 p-2" id="cell-5-4"></td>
+                                    <td class="border border-slate-400 bg-blue-50/40 p-2 align-top" id="cell-1-4"></td>
+                                    <td class="border border-slate-400 bg-blue-50/40 p-2 align-top" id="cell-2-4"></td>
+                                    <td class="border border-slate-400 bg-blue-50/40 p-2 align-top" id="cell-3-4"></td>
+                                    <td class="border border-slate-400 bg-blue-50/40 p-2 align-top" id="cell-4-4"></td>
+                                    <td class="border border-slate-400 bg-blue-50/40 p-2 align-top" id="cell-5-4"></td>
                                 </tr>
                                 <tr>
                                     <td rowspan="4" class="border border-slate-400 bg-pink-100 font-bold text-pink-900 align-middle">下<br>午</td>
                                     <td class="border border-slate-400 p-2 bg-slate-50">第5節<br>13:05-13:50</td>
-                                    <td class="border border-slate-400 bg-pink-50/40 p-2" id="cell-1-5"></td>
-                                    <td class="border border-slate-400 bg-pink-50/40 p-2" id="cell-2-5"></td>
-                                    <td class="border border-slate-400 bg-pink-50/40 p-2" id="cell-3-5"></td>
-                                    <td class="border border-slate-400 bg-pink-50/40 p-2" id="cell-4-5"></td>
-                                    <td class="border border-slate-400 bg-pink-50/40 p-2" id="cell-5-5"></td>
+                                    <td class="border border-slate-400 bg-pink-50/40 p-2 align-top" id="cell-1-5"></td>
+                                    <td class="border border-slate-400 bg-pink-50/40 p-2 align-top" id="cell-2-5"></td>
+                                    <td class="border border-slate-400 bg-pink-50/40 p-2 align-top" id="cell-3-5"></td>
+                                    <td class="border border-slate-400 bg-pink-50/40 p-2 align-top" id="cell-4-5"></td>
+                                    <td class="border border-slate-400 bg-pink-50/40 p-2 align-top" id="cell-5-5"></td>
                                 </tr>
                                 <tr>
                                     <td class="border border-slate-400 p-2 bg-slate-50">第6節<br>14:00-14:45</td>
-                                    <td class="border border-slate-400 bg-pink-50/40 p-2" id="cell-1-6"></td>
-                                    <td class="border border-slate-400 bg-pink-50/40 p-2" id="cell-2-6"></td>
-                                    <td class="border border-slate-400 bg-pink-50/40 p-2" id="cell-3-6"></td>
-                                    <td class="border border-slate-400 bg-pink-50/40 p-2" id="cell-4-6"></td>
-                                    <td class="border border-slate-400 bg-pink-50/40 p-2" id="cell-5-6"></td>
+                                    <td class="border border-slate-400 bg-pink-50/40 p-2 align-top" id="cell-1-6"></td>
+                                    <td class="border border-slate-400 bg-pink-50/40 p-2 align-top" id="cell-2-6"></td>
+                                    <td class="border border-slate-400 bg-pink-50/40 p-2 align-top" id="cell-3-6"></td>
+                                    <td class="border border-slate-400 bg-pink-50/40 p-2 align-top" id="cell-4-6"></td>
+                                    <td class="border border-slate-400 bg-pink-50/40 p-2 align-top" id="cell-5-6"></td>
                                 </tr>
                                 <tr>
                                     <td class="border border-slate-400 p-2 bg-slate-50">第7節<br>15:00-15:45</td>
-                                    <td class="border border-slate-400 bg-pink-50/40 p-2" id="cell-1-7"></td>
-                                    <td class="border border-slate-400 bg-pink-50/40 p-2" id="cell-2-7"></td>
-                                    <td class="border border-slate-400 bg-pink-50/40 p-2" id="cell-3-7"></td>
-                                    <td class="border border-slate-400 bg-pink-50/40 p-2" id="cell-4-7"></td>
-                                    <td class="border border-slate-400 bg-pink-50/40 p-2" id="cell-5-7"></td>
+                                    <td class="border border-slate-400 bg-pink-50/40 p-2 align-top" id="cell-1-7"></td>
+                                    <td class="border border-slate-400 bg-pink-50/40 p-2 align-top" id="cell-2-7"></td>
+                                    <td class="border border-slate-400 bg-pink-50/40 p-2 align-top" id="cell-3-7"></td>
+                                    <td class="border border-slate-400 bg-pink-50/40 p-2 align-top" id="cell-4-7"></td>
+                                    <td class="border border-slate-400 bg-pink-50/40 p-2 align-top" id="cell-5-7"></td>
                                 </tr>
                                 <tr>
                                     <td class="border border-slate-400 p-2 bg-slate-50">第8節<br>15:50-16:35</td>
-                                    <td class="border border-slate-400 bg-pink-50/40 p-2" id="cell-1-8"></td>
-                                    <td class="border border-slate-400 bg-pink-50/40 p-2" id="cell-2-8"></td>
-                                    <td class="border border-slate-400 bg-pink-50/40 p-2" id="cell-3-8"></td>
-                                    <td class="border border-slate-400 bg-pink-50/40 p-2" id="cell-4-8"></td>
-                                    <td class="border border-slate-400 bg-pink-50/40 p-2" id="cell-5-8"></td>
+                                    <td class="border border-slate-400 bg-pink-50/40 p-2 align-top" id="cell-1-8"></td>
+                                    <td class="border border-slate-400 bg-pink-50/40 p-2 align-top" id="cell-2-8"></td>
+                                    <td class="border border-slate-400 bg-pink-50/40 p-2 align-top" id="cell-3-8"></td>
+                                    <td class="border border-slate-400 bg-pink-50/40 p-2 align-top" id="cell-4-8"></td>
+                                    <td class="border border-slate-400 bg-pink-50/40 p-2 align-top" id="cell-5-8"></td>
                                 </tr>
                             </tbody>
                         </table>
@@ -299,6 +317,135 @@
                 </div>
             </section>
         </main>
+    </div>
+
+    <!-- 管理員分配設備與審核彈窗 -->
+    <div id="assignDeviceModal" class="fixed inset-0 bg-slate-900/50 hidden items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-2xl p-6 max-w-lg w-full shadow-xl max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-4 pb-2 border-b border-slate-100">
+                <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+                    <i class="fa-solid fa-sliders text-indigo-600"></i> 分派設備類型與審核
+                </h3>
+                <button onclick="closeAssignModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            
+            <div id="assignModalContent" class="space-y-4 mb-6">
+                <!-- 動態注入申請細節 -->
+            </div>
+
+            <!-- 需求 1 & 1-1: 三種類別可複選但類別間互斥 -->
+            <form id="assignDeviceForm" class="space-y-4">
+                <input type="hidden" id="assignAppId">
+                <div class="bg-indigo-50/70 p-4 rounded-xl border border-indigo-100 space-y-4">
+                    <label class="block text-xs font-bold text-indigo-900 mb-1">
+                        請選擇分派之設備（僅能選擇單一類別） <span class="text-red-500">*</span>
+                    </label>
+
+                    <!-- 1. Windows 系統 (Surface Go) -->
+                    <div id="group-surface" class="bg-white p-3 rounded-xl border border-slate-200 transition">
+                        <div class="font-semibold text-xs text-indigo-900 mb-2 border-b pb-1 flex justify-between">
+                            <span>Windows系列-Surface Go (A~Q 共17個)</span>
+                            <span class="text-[10px] text-slate-400 font-normal">可複選</span>
+                        </div>
+                        <div class="grid grid-cols-6 sm:grid-cols-9 gap-1.5 text-xs" id="surfaceOptions">
+                            <!-- A~Q 核取方塊將由 JS 動態生成 -->
+                        </div>
+                    </div>
+
+                    <!-- 2. iOS 系統 (ipad) -->
+                    <div id="group-ipad" class="bg-white p-3 rounded-xl border border-slate-200 transition">
+                        <div class="font-semibold text-xs text-indigo-900 mb-2 border-b pb-1 flex justify-between">
+                            <span>iOS系列-ipad (B, C, D, E, F, G, H, K 共8個)</span>
+                            <span class="text-[10px] text-slate-400 font-normal">可複選</span>
+                        </div>
+                        <div class="grid grid-cols-4 sm:grid-cols-8 gap-1.5 text-xs" id="ipadOptions">
+                            <!-- B~K 核取方塊將由 JS 動態生成 -->
+                        </div>
+                    </div>
+
+                    <!-- 需求 1: 3. Chromebook 系列 -->
+                    <div id="group-chromebook" class="bg-white p-3 rounded-xl border border-slate-200 transition">
+                        <div class="font-semibold text-xs text-indigo-900 mb-2 border-b pb-1 flex justify-between">
+                            <span>Chromebook 系列 (A, B 共2個)</span>
+                            <span class="text-[10px] text-slate-400 font-normal">可複選</span>
+                        </div>
+                        <div class="grid grid-cols-2 sm:grid-cols-6 gap-1.5 text-xs" id="chromebookOptions">
+                            <!-- A, B 核取方塊將由 JS 動態生成 -->
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-between gap-2 pt-2 border-t border-slate-100">
+                    <button type="button" onclick="handleAssignAction('delete')" class="px-3.5 py-2.5 bg-slate-100 hover:bg-red-50 text-slate-600 hover:text-red-600 rounded-xl font-medium text-sm transition flex items-center gap-1.5" title="刪除此紀錄">
+                        <i class="fa-solid fa-trash"></i> 刪除
+                    </button>
+                    <div class="flex gap-2">
+                        <button type="button" onclick="handleAssignAction('reject')" class="px-4 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-xl font-medium text-sm transition flex items-center gap-1.5" title="退件">
+                            <i class="fa-solid fa-xmark"></i> 退件
+                        </button>
+                        <button type="button" onclick="handleAssignAction('approve')" class="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-medium text-sm transition flex items-center gap-1.5 shadow-md shadow-emerald-200" title="審核通過">
+                            <i class="fa-solid fa-check"></i> 審核通過
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 需求 2: 課表檢視頁面 - 設備篩選彈窗 -->
+    <div id="filterModal" class="fixed inset-0 bg-slate-900/50 hidden items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-2xl p-6 max-w-lg w-full shadow-xl max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-4 pb-2 border-b border-slate-100">
+                <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+                    <i class="fa-solid fa-filter text-indigo-600"></i> 篩選顯示設備
+                </h3>
+                <button onclick="closeFilterModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+
+            <div class="space-y-4 mb-6">
+                <!-- 全選勾選項 -->
+                <div class="bg-indigo-50 p-3 rounded-xl border border-indigo-100 flex items-center justify-between">
+                    <label class="flex items-center gap-2 cursor-pointer font-bold text-sm text-indigo-900 select-none">
+                        <input type="checkbox" id="selectAllFilter" onchange="toggleSelectAllFilters(this.checked)" class="w-4 h-4 accent-indigo-600 rounded">
+                        全選所有類別與項目
+                    </label>
+                    <span class="text-xs text-indigo-600 font-medium">項目不互斥，可跨類別多選</span>
+                </div>
+
+                <!-- 1. Windows系列-Surface Go A~Q -->
+                <div class="bg-white p-3 rounded-xl border border-slate-200">
+                    <div class="font-semibold text-xs text-indigo-900 mb-2 border-b pb-1">
+                        Windows系列-Surface Go (A~Q)
+                    </div>
+                    <div class="grid grid-cols-6 sm:grid-cols-9 gap-1.5 text-xs" id="filterSurfaceOptions"></div>
+                </div>
+
+                <!-- 2. iOS系列-ipad B~K -->
+                <div class="bg-white p-3 rounded-xl border border-slate-200">
+                    <div class="font-semibold text-xs text-indigo-900 mb-2 border-b pb-1">
+                        iOS系列-ipad (B, C, D, E, F, G, H, K)
+                    </div>
+                    <div class="grid grid-cols-4 sm:grid-cols-8 gap-1.5 text-xs" id="filterIpadOptions"></div>
+                </div>
+
+                <!-- 3. Chromebook 系列 A~B -->
+                <div class="bg-white p-3 rounded-xl border border-slate-200">
+                    <div class="font-semibold text-xs text-indigo-900 mb-2 border-b pb-1">
+                        Chromebook 系列 (A, B)
+                    </div>
+                    <div class="grid grid-cols-2 sm:grid-cols-6 gap-1.5 text-xs" id="filterChromebookOptions"></div>
+                </div>
+            </div>
+
+            <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+                <button type="button" onclick="closeFilterModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl font-medium text-sm transition">
+                    取消
+                </button>
+                <button type="button" onclick="applyFilter()" class="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-medium text-sm transition flex items-center gap-1.5 shadow-md shadow-indigo-200">
+                    <i class="fa-solid fa-check"></i> 確認篩選
+                </button>
+            </div>
+        </div>
     </div>
 
     <div id="loginModal" class="fixed inset-0 bg-slate-900/50 hidden items-center justify-center p-4 z-50">
@@ -335,12 +482,181 @@
     </div>
 
     <script>
-        // 替換為您的 Google Apps Script 部署 URL
         const GAS_API_URL = "https://script.google.com/macros/s/AKfycbyfj05o2l6JLzD8rFE9v7I3jnNhjoNK3MbMGmcpgaCms582zPCQ3DJWt6dxoAE_w3CL/exec";
         const ADMIN_AUTH_URL = "https://script.google.com/macros/s/AKfycbw-b5R_dfCj7aZgDTqT4C7o1crFFPIvRP3SdpLG9A_vqhGpMh2t5NRsqDD5FYmQ1o53/exec";
 
         let applications = [];
         let isAdminLoggedIn = false;
+
+        // 全域保存課表目前的篩選設備字串陣列 (預設 null 表示顯示全部)
+        let activeDeviceFilters = null;
+
+        // 初始化生成彈窗內的設備多選選項 (包含分派彈窗 & 篩選彈窗)
+        function initDeviceOptions() {
+            const surfaceLetters = Array.from({length: 17}, (_, i) => String.fromCharCode(65 + i)); // A-Q
+            const ipadLetters = ['B', 'C', 'D', 'E', 'F', 'G', 'H', 'K'];
+            const chromebookLetters = ['A', 'B'];
+
+            // --- 1. 分派彈窗之選項生成 ---
+            // Surface Go: A ~ Q
+            const surfaceContainer = document.getElementById('surfaceOptions');
+            surfaceContainer.innerHTML = surfaceLetters.map(let => `
+                <label class="flex flex-col items-center justify-center p-1.5 border rounded cursor-pointer hover:bg-indigo-50 border-slate-200 select-none">
+                    <input type="checkbox" name="surface_opt" value="${let}" onchange="handleDeviceSelectionChange('surface')" class="accent-indigo-600 mb-1">
+                    <span class="font-bold">${let}</span>
+                </label>
+            `).join('');
+
+            // iPad: B, C, D, E, F, G, H, K
+            const ipadContainer = document.getElementById('ipadOptions');
+            ipadContainer.innerHTML = ipadLetters.map(let => `
+                <label class="flex flex-col items-center justify-center p-1.5 border rounded cursor-pointer hover:bg-indigo-50 border-slate-200 select-none">
+                    <input type="checkbox" name="ipad_opt" value="${let}" onchange="handleDeviceSelectionChange('ipad')" class="accent-indigo-600 mb-1">
+                    <span class="font-bold">${let}</span>
+                </label>
+            `).join('');
+
+            // Chromebook: A, B
+            const cbContainer = document.getElementById('chromebookOptions');
+            cbContainer.innerHTML = chromebookLetters.map(let => `
+                <label class="flex flex-col items-center justify-center p-1.5 border rounded cursor-pointer hover:bg-indigo-50 border-slate-200 select-none">
+                    <input type="checkbox" name="chromebook_opt" value="${let}" onchange="handleDeviceSelectionChange('chromebook')" class="accent-indigo-600 mb-1">
+                    <span class="font-bold">${let}</span>
+                </label>
+            `).join('');
+
+
+            // --- 2. 課表篩選彈窗之選項生成 (無排斥機制) ---
+            const filterSurfaceContainer = document.getElementById('filterSurfaceOptions');
+            filterSurfaceContainer.innerHTML = surfaceLetters.map(let => `
+                <label class="flex flex-col items-center justify-center p-1.5 border rounded cursor-pointer hover:bg-indigo-50 border-slate-200 select-none">
+                    <input type="checkbox" name="filter_opt" value="Surface Go ${let}" onchange="updateSelectAllCheckboxState()" class="accent-indigo-600 mb-1">
+                    <span class="font-bold">${let}</span>
+                </label>
+            `).join('');
+
+            const filterIpadContainer = document.getElementById('filterIpadOptions');
+            filterIpadContainer.innerHTML = ipadLetters.map(let => `
+                <label class="flex flex-col items-center justify-center p-1.5 border rounded cursor-pointer hover:bg-indigo-50 border-slate-200 select-none">
+                    <input type="checkbox" name="filter_opt" value="ipad ${let}" onchange="updateSelectAllCheckboxState()" class="accent-indigo-600 mb-1">
+                    <span class="font-bold">${let}</span>
+                </label>
+            `).join('');
+
+            const filterCbContainer = document.getElementById('filterChromebookOptions');
+            filterCbContainer.innerHTML = chromebookLetters.map(let => `
+                <label class="flex flex-col items-center justify-center p-1.5 border rounded cursor-pointer hover:bg-indigo-50 border-slate-200 select-none">
+                    <input type="checkbox" name="filter_opt" value="Chromebook ${let}" onchange="updateSelectAllCheckboxState()" class="accent-indigo-600 mb-1">
+                    <span class="font-bold">${let}</span>
+                </label>
+            `).join('');
+        }
+
+        // 需求 1-1: 分派彈窗的 3 類別互相排斥（選擇其中一類，另外兩類不能選）
+        function handleDeviceSelectionChange(type) {
+            const surfaceBoxes = document.querySelectorAll('input[name="surface_opt"]');
+            const ipadBoxes = document.querySelectorAll('input[name="ipad_opt"]');
+            const chromebookBoxes = document.querySelectorAll('input[name="chromebook_opt"]');
+
+            const hasSurfaceChecked = Array.from(surfaceBoxes).some(cb => cb.checked);
+            const hasIpadChecked = Array.from(ipadBoxes).some(cb => cb.checked);
+            const hasChromebookChecked = Array.from(chromebookBoxes).some(cb => cb.checked);
+
+            if (type === 'surface' && hasSurfaceChecked) {
+                ipadBoxes.forEach(cb => { cb.checked = false; cb.disabled = true; });
+                chromebookBoxes.forEach(cb => { cb.checked = false; cb.disabled = true; });
+                document.getElementById('group-ipad').classList.add('opacity-40', 'pointer-events-none');
+                document.getElementById('group-chromebook').classList.add('opacity-40', 'pointer-events-none');
+            } else if (type === 'ipad' && hasIpadChecked) {
+                surfaceBoxes.forEach(cb => { cb.checked = false; cb.disabled = true; });
+                chromebookBoxes.forEach(cb => { cb.checked = false; cb.disabled = true; });
+                document.getElementById('group-surface').classList.add('opacity-40', 'pointer-events-none');
+                document.getElementById('group-chromebook').classList.add('opacity-40', 'pointer-events-none');
+            } else if (type === 'chromebook' && hasChromebookChecked) {
+                surfaceBoxes.forEach(cb => { cb.checked = false; cb.disabled = true; });
+                ipadBoxes.forEach(cb => { cb.checked = false; cb.disabled = true; });
+                document.getElementById('group-surface').classList.add('opacity-40', 'pointer-events-none');
+                document.getElementById('group-ipad').classList.add('opacity-40', 'pointer-events-none');
+            } else if (!hasSurfaceChecked && !hasIpadChecked && !hasChromebookChecked) {
+                surfaceBoxes.forEach(cb => cb.disabled = false);
+                ipadBoxes.forEach(cb => cb.disabled = false);
+                chromebookBoxes.forEach(cb => cb.disabled = false);
+                document.getElementById('group-surface').classList.remove('opacity-40', 'pointer-events-none');
+                document.getElementById('group-ipad').classList.remove('opacity-40', 'pointer-events-none');
+                document.getElementById('group-chromebook').classList.remove('opacity-40', 'pointer-events-none');
+            }
+        }
+
+        // 重置分派彈窗內的選擇狀態
+        function resetModalSelections() {
+            const surfaceBoxes = document.querySelectorAll('input[name="surface_opt"]');
+            const ipadBoxes = document.querySelectorAll('input[name="ipad_opt"]');
+            const cbBoxes = document.querySelectorAll('input[name="chromebook_opt"]');
+
+            surfaceBoxes.forEach(cb => { cb.checked = false; cb.disabled = false; });
+            ipadBoxes.forEach(cb => { cb.checked = false; cb.disabled = false; });
+            cbBoxes.forEach(cb => { cb.checked = false; cb.disabled = false; });
+
+            document.getElementById('group-surface').classList.remove('opacity-40', 'pointer-events-none');
+            document.getElementById('group-ipad').classList.remove('opacity-40', 'pointer-events-none');
+            document.getElementById('group-chromebook').classList.remove('opacity-40', 'pointer-events-none');
+        }
+
+        // 需求 2: 篩選彈窗控制邏輯
+        function openFilterModal() {
+            const filterBoxes = document.querySelectorAll('input[name="filter_opt"]');
+            
+            if (activeDeviceFilters === null) {
+                // 若尚未篩選或為預設全選，則預設將彈窗所有方塊都勾選
+                filterBoxes.forEach(cb => cb.checked = true);
+            } else {
+                filterBoxes.forEach(cb => {
+                    cb.checked = activeDeviceFilters.includes(cb.value);
+                });
+            }
+            
+            updateSelectAllCheckboxState();
+            document.getElementById('filterModal').classList.remove('hidden');
+            document.getElementById('filterModal').classList.add('flex');
+        }
+
+        function closeFilterModal() {
+            document.getElementById('filterModal').classList.add('hidden');
+            document.getElementById('filterModal').classList.remove('flex');
+        }
+
+        function toggleSelectAllFilters(checked) {
+            const filterBoxes = document.querySelectorAll('input[name="filter_opt"]');
+            filterBoxes.forEach(cb => cb.checked = checked);
+        }
+
+        function updateSelectAllCheckboxState() {
+            const filterBoxes = document.querySelectorAll('input[name="filter_opt"]');
+            const selectAllCb = document.getElementById('selectAllFilter');
+            const allChecked = Array.from(filterBoxes).every(cb => cb.checked);
+            selectAllCb.checked = allChecked;
+        }
+
+        function applyFilter() {
+            const checkedBoxes = Array.from(document.querySelectorAll('input[name="filter_opt"]:checked'));
+            const filterBoxes = document.querySelectorAll('input[name="filter_opt"]');
+
+            if (checkedBoxes.length === 0) {
+                showModal('提示', '請至少勾選一個設備進行篩選。', 'error');
+                return;
+            }
+
+            if (checkedBoxes.length === filterBoxes.length) {
+                activeDeviceFilters = null; // 全選模式
+                document.getElementById('activeFilterBadge').innerText = '全部顯示';
+            } else {
+                activeDeviceFilters = checkedBoxes.map(cb => cb.value);
+                document.getElementById('activeFilterBadge').innerText = `已選 ${activeDeviceFilters.length} 個項目 (${activeDeviceFilters.slice(0, 3).join(', ')}${activeDeviceFilters.length > 3 ? '...' : ''})`;
+            }
+
+            closeFilterModal();
+            renderTimetable();
+        }
 
         // 從後端試算表取得資料
         async function fetchApplications() {
@@ -362,6 +678,25 @@
             
             await fetchApplications();
             renderAdminTable();
+
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-arrows-rotate"></i> 重新整理';
+            }
+        }
+
+        // 重新整理課表檢視頁面資料
+        async function refreshTimetableData() {
+            const btn = document.getElementById('btn-refresh-timetable');
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fa-solid fa-arrows-rotate fa-spin"></i> 讀取中...';
+            }
+    
+            // 重新向伺服器/試算表抓取最新資料
+            await fetchApplications();
+            // 重新繪製課表
+            renderTimetable();
 
             if (btn) {
                 btn.disabled = false;
@@ -409,7 +744,6 @@
                     showModal('登入失敗', result.message || '帳號或密碼錯誤！', 'error');
                 }
             } catch (err) {
-                // 若後端僅接受 GET 驗證，作備用請求
                 try {
                     const resGet = await fetch(`${ADMIN_AUTH_URL}?username=${encodeURIComponent(user)}&password=${encodeURIComponent(pass)}`);
                     const resultGet = await resGet.json();
@@ -452,6 +786,10 @@
                 btnAdmin.classList.add('hidden');
                 btnLogin.classList.remove('hidden');
                 btnLogout.classList.add('hidden');
+            }
+
+            if (!document.getElementById('tab-timetable').classList.contains('hidden')) {
+                renderTimetable();
             }
         }
 
@@ -507,7 +845,6 @@
             }
         }
 
-        // 表單提交處理：新增資料至 Google 試算表
         async function handleFormSubmit(e) {
             e.preventDefault();
             const submitBtn = document.getElementById('submitBtn');
@@ -523,7 +860,7 @@
                 email: formData.get('email'),
                 teacherName: formData.get('teacherName'),
                 subject: formData.get('subject'),
-                deviceType: 'Windows-Surface Go & iOS-ipad 由管理員分配',
+                deviceType: '由管理員分配',
                 workshops: selectedWorkshops,
                 grade: formData.get('grade'),
                 className: formData.get('className'),
@@ -540,7 +877,7 @@
                     body: JSON.stringify({ action: 'create', data: newApp })
                 });
 
-                e.target.reset();
+                
                 updateSlotCode();
                 showModal('提交成功', '您的借用申請已成功儲存至試算表，請等待管理員審核。', 'success');
             } catch (err) {
@@ -551,7 +888,10 @@
             }
         }
 
-        // 渲染管理後台資料
+        function isUnassignedDevice(deviceType) {
+            return !deviceType || deviceType === '由管理員分配' || deviceType === '未指定';
+        }
+
         function renderAdminTable() {
             const tbody = document.getElementById('adminTableBody');
             const pendingCount = applications.filter(a => String(a.status) === 'pending').length;
@@ -563,32 +903,12 @@
             }
 
             const dayNames = { '1': '週一', '2': '週二', '3': '週三', '4': '週四', '5': '週五' };
-
-            // 使用 [...applications].reverse() 將陣列反向，最新的資料會在最上面
             const sortedApplications = [...applications].reverse();
 
             tbody.innerHTML = sortedApplications.map(app => {
                 const slot = String(app.slotCode || '');
                 const dayText = dayNames[slot[0]] || '';
                 const periodText = slot[1] || '';
-
-                let deviceHtml = '';
-                if (!app.deviceType || app.deviceType === 'Windows-Surface Go & iOS-ipad 由管理員分配' || app.deviceType === '未指定') {
-                    deviceHtml = `
-                        <div class="space-y-1">
-                            <label class="flex items-center gap-1.5 cursor-pointer text-xs">
-                                <input type="radio" name="adminDevice_${app.id}" value="Windows系統-Surface Go" class="text-indigo-600 focus:ring-indigo-500">
-                                <span>Windows系統-Surface Go</span>
-                            </label>
-                            <label class="flex items-center gap-1.5 cursor-pointer text-xs">
-                                <input type="radio" name="adminDevice_${app.id}" value="iOS系統-ipad" class="text-indigo-600 focus:ring-indigo-500">
-                                <span>iOS系統-ipad</span>
-                            </label>
-                        </div>
-                    `;
-                } else {
-                    deviceHtml = `<span class="font-medium text-slate-700">${app.deviceType}</span>`;
-                }
 
                 return `
                 <tr class="hover:bg-slate-50 transition">
@@ -600,10 +920,12 @@
                         <div class="font-medium text-slate-800">${app.subject} (${app.courseName})</div>
                         <div class="text-xs text-indigo-600 font-semibold">班級：${app.className}</div>
                     </td>
-                    <td class="p-3 text-xs text-slate-600">${deviceHtml}</td>
+                    <td class="p-3 text-xs text-slate-600 whitespace-nowrap">
+                        <span class="font-medium text-slate-700">${app.deviceType}</span>
+                    </td>
                     <td class="p-3">
                         <div class="text-xs font-bold text-slate-700">時段：${dayText} 第 ${periodText} 節</div>
-                        <div class="text-xs text-slate-600 mt-0.5 bg-slate-50 p-1.5 rounded border border-slate-100 max-w-xs">${app.usageDescription}</div>
+                        <div class="text-xs text-slate-600 mt-0.5 bg-slate-50 p-1.5 rounded border border-slate-100 max-w-xs break-words">${app.usageDescription}</div>
                     </td>
                     <td class="p-3">
                         ${app.status === 'pending' ? '<span class="bg-amber-100 text-amber-800 text-xs px-2.5 py-1 rounded-full font-medium">待審核</span>' : ''}
@@ -612,8 +934,7 @@
                     </td>
                     <td class="p-3 text-center">
                         <div class="flex justify-center gap-1">
-                            <button onclick="updateStatus('${app.id}', 'approved')" class="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded text-xs transition" title="審核通過"><i class="fa-solid fa-check"></i></button>
-                            <button onclick="updateStatus('${app.id}', 'rejected')" class="px-2.5 py-1 bg-red-600 hover:bg-red-700 text-white rounded text-xs transition" title="退件"><i class="fa-solid fa-xmark"></i></button>
+                            <button onclick="openAssignModal('${app.id}')" class="px-2.5 py-1 bg-indigo-600 hover:bg-indigo-700 text-white rounded text-xs transition" title="審核/分派"><i class="fa-solid fa-sliders"></i></button>
                             <button onclick="deleteApp('${app.id}')" class="px-2.5 py-1 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded text-xs transition" title="刪除"><i class="fa-solid fa-trash"></i></button>
                         </div>
                     </td>
@@ -621,26 +942,85 @@
             `}).join('');
         }
 
-        // 更新審核狀態至 Google 試算表
-        async function updateStatus(id, newStatus) {
+        // 開啟分派設備彈窗
+        function openAssignModal(id) {
+            const app = applications.find(a => String(a.id) === String(id));
+            if (!app) return;
+
+            document.getElementById('assignAppId').value = app.id;
+            const dayNames = { '1': '一', '2': '二', '3': '三', '4': '四', '5': '五' };
+            const slot = String(app.slotCode || '');
+            const dayText = dayNames[slot[0]] || '';
+            const periodText = slot[1] || '';
+
+            document.getElementById('assignModalContent').innerHTML = `
+                <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-1 text-sm">
+                    <div><span class="text-slate-500">申請教師：</span><span class="font-bold text-slate-800">${app.teacherName}</span></div>
+                    <div><span class="text-slate-500">班級課程：</span><span class="font-medium text-slate-800">${app.className} - ${app.courseName} (${app.subject})</span></div>
+                    <div><span class="text-slate-500">借用時段：</span><span class="font-semibold text-indigo-600">星期${dayText} 第 ${periodText} 節</span></div>
+                    <div><span class="text-slate-500">教學說明：</span><span class="text-slate-700 break-words">${app.usageDescription}</span></div>
+                </div>
+            `;
+
+            resetModalSelections();
+
+            document.getElementById('assignDeviceModal').classList.remove('hidden');
+            document.getElementById('assignDeviceModal').classList.add('flex');
+        }
+
+        function closeAssignModal() {
+            document.getElementById('assignDeviceModal').classList.add('hidden');
+            document.getElementById('assignDeviceModal').classList.remove('flex');
+        }
+
+        // 需求 1: 處理核准並組合為 Surface Go A, B / ipad C, D / Chromebook A, B 格式
+        async function handleAssignAction(action) {
+            const id = document.getElementById('assignAppId').value;
+            if (!id) return;
+
+            if (action === 'delete') {
+                closeAssignModal();
+                await deleteApp(id);
+                return;
+            }
+
+            if (action === 'reject') {
+                closeAssignModal();
+                await updateStatus(id, 'rejected');
+                return;
+            }
+
+            if (action === 'approve') {
+                const checkedSurface = Array.from(document.querySelectorAll('input[name="surface_opt"]:checked')).map(cb => cb.value);
+                const checkedIpad = Array.from(document.querySelectorAll('input[name="ipad_opt"]:checked')).map(cb => cb.value);
+                const checkedCb = Array.from(document.querySelectorAll('input[name="chromebook_opt"]:checked')).map(cb => cb.value);
+
+                if (checkedSurface.length === 0 && checkedIpad.length === 0 && checkedCb.length === 0) {
+                    showModal('提示', '請至少選擇一個 Surface Go、ipad 或 Chromebook 選項。', 'error');
+                    return;
+                }
+
+                let formattedDeviceStr = '';
+                if (checkedSurface.length > 0) {
+                    formattedDeviceStr = `Surface Go ${checkedSurface.join(', ')}`;
+                } else if (checkedIpad.length > 0) {
+                    formattedDeviceStr = `ipad ${checkedIpad.join(', ')}`;
+                } else if (checkedCb.length > 0) {
+                    formattedDeviceStr = `Chromebook ${checkedCb.join(', ')}`;
+                }
+
+                closeAssignModal();
+                await updateStatus(id, 'approved', formattedDeviceStr);
+            }
+        }
+
+        async function updateStatus(id, newStatus, assignedDevice = null) {
             const appIndex = applications.findIndex(a => String(a.id) === String(id));
             if (appIndex === -1) return;
 
             const app = applications[appIndex];
-            let selectedDevice = app.deviceType || '';
+            let selectedDevice = assignedDevice || app.deviceType || '';
 
-            if (newStatus === 'approved') {
-                if (!selectedDevice || selectedDevice === 'Windows-Surface Go & iOS-ipad 由管理員分配' || selectedDevice === '未指定') {
-                    const selectedRadio = document.querySelector(`input[name="adminDevice_${id}"]:checked`);
-                    if (!selectedRadio) {
-                        showModal('提示', '請先選擇「裝置需求」（Windows系統-Surface Go 或 iOS系統-ipad）。', 'error');
-                        return;
-                    }
-                    selectedDevice = selectedRadio.value;
-                }
-            }
-
-            // 本地資料更新
             applications[appIndex].status = newStatus;
             applications[appIndex].deviceType = selectedDevice;
 
@@ -662,13 +1042,15 @@
                 });
 
                 renderAdminTable();
+                if (!document.getElementById('tab-timetable').classList.contains('hidden')) {
+                    renderTimetable();
+                }
                 showModal('狀態更新成功', `該筆申請狀態已更新為 ${newStatus === 'approved' ? '已核准' : '已退件'}。`, 'success');
             } catch (err) {
                 showModal('更新失敗', '連線至試算表失敗，請重試。', 'error');
             }
         }
 
-        // 刪除申請紀錄
         async function deleteApp(id) {
             if (!confirm('確定要刪除這筆申請嗎？')) return;
 
@@ -681,15 +1063,17 @@
 
                 applications = applications.filter(a => String(a.id) !== String(id));
                 renderAdminTable();
+                if (!document.getElementById('tab-timetable').classList.contains('hidden')) {
+                    renderTimetable();
+                }
                 showModal('刪除成功', '該筆紀錄已從試算表中移除。', 'success');
             } catch (err) {
                 showModal('刪除失敗', '刪除失敗，請檢查網路連線。', 'error');
             }
         }
 
-        // 讀取後端資料並繪製總課表
+        // 需求 2: 課表繪製時，依據篩選條件進行精準比對與呈現
         function renderTimetable() {
-            // 清空課表內容
             for (let d = 1; d <= 5; d++) {
                 for (let p = 1; p <= 8; p++) {
                     const cell = document.getElementById(`cell-${d}-${p}`);
@@ -697,23 +1081,73 @@
                 }
             }
 
-            // 僅顯示狀態為 approved (已核准) 的項目
-            const approvedApps = applications.filter(a => String(a.status) === 'approved');
-            approvedApps.forEach(app => {
+            const subtitle = document.getElementById('timetableSubtitle');
+            if (isAdminLoggedIn) {
+                if (subtitle) subtitle.innerText = '【管理員檢視模式】顯示已核准項目及待審核未分派紀錄（點擊待審核項目可直接分派設備並審核）';
+            } else {
+                if (subtitle) subtitle.innerText = '根據已審核通過的申請自動即時產生之全校課表檢視';
+            }
+
+            const displayApps = applications.filter(a => {
+                const status = String(a.status);
+                if (status === 'rejected') return false;
+
+                // 判斷權限狀態
+                let canShow = false;
+                if (isAdminLoggedIn) {
+                    if (status === 'approved') canShow = true;
+                    else if (status === 'pending' && isUnassignedDevice(a.deviceType)) canShow = true;
+                } else {
+                    canShow = (status === 'approved');
+                }
+
+                if (!canShow) return false;
+
+                // 待審核/未分派紀錄一律顯示（方便管理員查看）
+                if (status === 'pending' && isUnassignedDevice(a.deviceType)) return true;
+
+                // 進行篩選設備過濾 (針對已分配設備紀錄)
+                if (activeDeviceFilters !== null) {
+                    const devStr = String(a.deviceType || '');
+                    // 比對被篩選出的項目（如 "Surface Go A" 是否存在於紀錄字串 "Surface Go A, B" 中）
+                    const matches = activeDeviceFilters.some(filterItem => devStr.includes(filterItem));
+                    return matches;
+                }
+
+                return true;
+            });
+
+            displayApps.forEach(app => {
                 const code = String(app.slotCode || '');
                 if (code && code.length === 2) {
                     const day = code[0];
                     const period = code[1];
                     const cell = document.getElementById(`cell-${day}-${period}`);
                     if (cell) {
-                        cell.innerHTML += `
-                            <div class="bg-indigo-50 border border-indigo-200 rounded p-1 mb-1 text-left text-[11px] shadow-sm">
-                                <div class="font-bold text-indigo-900">${app.className} - ${app.courseName}</div>
-                                <div class="text-slate-600">${app.teacherName} (${app.subject})</div>
-                                <div class="text-[10px] text-slate-500 mt-0.5 italic truncate" title="${app.usageDescription}">📝 ${app.usageDescription}</div>
-                                <div class="text-[9px] text-indigo-500 mt-0.5 truncate">${app.deviceType}</div>
-                            </div>
-                        `;
+                        const isPending = String(app.status) === 'pending';
+                        
+                        if (isAdminLoggedIn && isPending) {
+                            cell.innerHTML += `
+                                <div onclick="openAssignModal('${app.id}')" class="bg-amber-50 border-2 border-dashed border-amber-400 hover:border-amber-600 hover:bg-amber-100 rounded p-1.5 mb-1 text-left text-[11px] shadow-sm cursor-pointer transition relative group" title="點擊進行設備分派與審核">
+                                    <div class="flex justify-between items-center mb-0.5">
+                                        <span class="font-bold text-amber-900 break-words">${app.className} - ${app.courseName}</span>
+                                        <span class="bg-amber-200 text-amber-900 text-[9px] px-1 rounded font-bold shrink-0">待分派</span>
+                                    </div>
+                                    <div class="text-slate-700">${app.teacherName}</div>
+                                    <div class="text-[10px] font-bold text-amber-700 mt-1 flex items-center gap-1">
+                                        <i class="fa-solid fa-hand-pointer"></i> 點擊分派設備
+                                    </div>
+                                </div>
+                            `;
+                        } else {
+                            cell.innerHTML += `
+                                <div class="bg-indigo-50 border border-indigo-200 rounded p-1 mb-1 text-left text-[11px] shadow-sm">
+                                    <div class="font-bold text-indigo-900 break-words">${app.className} - ${app.courseName}</div>
+                                    <div class="text-slate-600">${app.teacherName} </div>
+                                    <div class="text-[9px] text-indigo-600 font-semibold mt-0.5 break-words">${app.deviceType}</div>
+                                </div>
+                            `;
+                        }
                     }
                 }
             });
@@ -740,6 +1174,7 @@
         }
 
         window.onload = function() {
+            initDeviceOptions();
             updateSlotCode();
             fetchApplications();
             updateAdminUI();
